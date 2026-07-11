@@ -1,0 +1,15 @@
+.root {
+    -fx-background-color: #202020;
+}
+
+.label {
+    -fx-text-fill: white;
+}
+
+.button {
+    -fx-background-radius: 10;
+}
+
+.list-view {
+    -fx-background-color: #2a2a2a;
+}
