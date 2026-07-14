@@ -9,37 +9,21 @@ public class Library {
     private final Map<UUID, Song> songsByID = new HashMap<>();
     private final Map<Path, Long> lastModifiedByPath = new HashMap<>();
 
-    public Optional<Path> getMusicRoot() {
-        return Optional.ofNullable(musicRoot);
-    }
+    public Optional<Path> getMusicRoot() { return Optional.ofNullable(musicRoot); }
 
-    public void setMusicRoot(Path musicRoot) {
-        this.musicRoot = musicRoot;
-    }
+    public void setMusicRoot(Path musicRoot) { this.musicRoot = musicRoot; }
 
-    public List<Song> getSongs() {
-        return new ArrayList<>(songsByPath.values());
-    }
+    public List<Song> getSongs() { return new ArrayList<>(songsByPath.values()); }
 
-    public int size() {
-        return songsByPath.size();
-    }
+    public int size() { return songsByPath.size(); }
 
-    public boolean isEmpty() {
-        return songsByPath.isEmpty();
-    }
+    public boolean isEmpty() { return songsByPath.isEmpty(); }
 
-    public Optional<Song> findByPath(Path path) {
-        return Optional.ofNullable(songsByPath.get(normalize(path)));
-    }
+    public Optional<Song> findByPath(Path path) { return Optional.ofNullable(songsByPath.get(normalize(path))); }
 
-    public Optional<Song> findByID(UUID id) {
-        return Optional.ofNullable(songsByID.get(id));
-    }
+    public Optional<Song> findByID(UUID id) { return Optional.ofNullable(songsByID.get(id)); }
 
-    public Optional<Long> getLastModified(Path path) {
-        return Optional.ofNullable(lastModifiedByPath.get(normalize(path)));
-    }
+    public Optional<Long> getLastModified(Path path) { return Optional.ofNullable(lastModifiedByPath.get(normalize(path))); }
 
     public void upsert(Song song, long lastModifiedMillis) {
         Path path = normalize(song.getPath());

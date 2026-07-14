@@ -96,26 +96,21 @@ public class MetadataReaderService {
     }
 
     private ParsedArtists parseArtists(Tag tag) {
-
         String albumArtist = clean(tag.getFirst(FieldKey.ALBUM_ARTIST));
         String artistField = clean(tag.getFirst(FieldKey.ARTIST));
-
         String primary;
 
         if (!albumArtist.isBlank()) {
             primary = splitArtists(albumArtist).getFirst();
         } else {
             List<String> artists = splitArtists(artistField);
-
             if (artists.isEmpty()) {
                 return new ParsedArtists("Unknown artist", List.of());
             }
-
             primary = artists.getFirst();
         }
 
         LinkedHashSet<String> featured = new LinkedHashSet<>();
-
         splitArtists(artistField)
                 .stream()
                 .skip(1)
@@ -127,7 +122,6 @@ public class MetadataReaderService {
                     .filter(a -> !a.equalsIgnoreCase(primary))
                     .forEach(featured::add);
         }
-
         return new ParsedArtists(primary, List.copyOf(featured));
     }
 
@@ -162,11 +156,9 @@ public class MetadataReaderService {
 
     private ParsedArtists parseArtistString(String raw) {
         List<String> artists = splitArtists(raw);
-
         if (artists.isEmpty()) {
             return new ParsedArtists("Unknown artist", List.of());
         }
-
         return new ParsedArtists(
                 artists.getFirst(),
                 artists.stream().skip(1).toList()
@@ -177,7 +169,6 @@ public class MetadataReaderService {
         if (value == null || value.isBlank()) {
             return List.of();
         }
-
         return Arrays.stream(value.split(
                         "(?i)\\s*(?:/|;|\\bfeat\\.?\\b|\\bft\\.?\\b|\\bfeaturing\\b)\\s*"))
                 .map(String::trim)

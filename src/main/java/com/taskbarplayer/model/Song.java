@@ -122,6 +122,6 @@ public class Song {
         if (this.featuredArtists.isEmpty()) {
             return artist + " - " + title;
         }
-        return artist + "ft. " + String.join(", ", featuredArtists) + " - " + title;
+        return artist + " ft. " + String.join(", ", featuredArtists) + " - " + title;
     }
 }

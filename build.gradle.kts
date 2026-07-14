@@ -26,7 +26,6 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainModule.set("com.taskbarplayer")
     mainClass.set("com.taskbarplayer.TaskbarPlayerApp")
 }
 
@@ -46,6 +45,13 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+task<JavaExec>("runTerminalPlayer") {
+    group = "run"
+    description = "Run the Terminal Music Player"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.taskbarplayer.util.TerminalMusicPlayer")
 }
 
 jlink {

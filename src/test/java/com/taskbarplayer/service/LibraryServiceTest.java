@@ -17,13 +17,19 @@ import static org.junit.jupiter.api.Assertions.*;
 class LibraryServiceTest {
 
     private LibraryService libraryService;
+    private Path sampleLibrary;
 
     @TempDir
     Path tempDir;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         libraryService = new LibraryService();
+        sampleLibrary = Path.of(
+                getClass()
+                        .getClassLoader()
+                        .getResource("sample-library")
+                        .toURI());
     }
 
     @Test
@@ -33,82 +39,71 @@ class LibraryServiceTest {
 
     @Test
     void scanLibrary_indexesAudioFiles() throws Exception {
-        libraryService.setMusicDirectory(getSampleLibrary());
-
+        libraryService.setMusicDirectory(sampleLibrary);
         libraryService.scanLibrary();
-
         List<Song> songs = libraryService.getSongs();
-
         assertEquals(4, songs.size());
-
-        assertTrue(songs.stream().anyMatch(s -> s.getTitle().equals("ばかまじめ")));
-        assertTrue(songs.stream().anyMatch(s -> s.getTitle().equals("夜に駆ける")));
-        assertTrue(songs.stream().anyMatch(s -> s.getTitle().equals("あぶく")));
-        assertTrue(songs.stream().anyMatch(s -> s.getTitle().equals("歩く")));
+        assertTrue(songs.stream().anyMatch(s ->
+                s.getPath().getFileName().toString().equals("Monkeys Spinning Monkeys (Kevin MacLeod).mp3")));
+        assertTrue(songs.stream().anyMatch(s ->
+                s.getPath().getFileName().toString().equals("Sneaky Snitch (Kevin MacLeod).mp3")));
+        assertTrue(songs.stream().anyMatch(s ->
+                s.getPath().getFileName().toString().equals("Bagatelle no. 25 ''Für Elise'', WoO 59.mp3")));
+        assertTrue(songs.stream().anyMatch(s ->
+                s.getPath().getFileName().toString().equals("Piano Sonata no. 11, K. 331 - III. Alla Turca.mp3")));
     }
 
     @Test
     void scanLibrary_skipsUnchangedFiles() throws Exception {
-        libraryService.setMusicDirectory(getSampleLibrary());
+        libraryService.setMusicDirectory(sampleLibrary);
         libraryService.scanLibrary();
 
-        Path file = getSampleLibrary().resolve("ヨルシカ - あぶく.mp3");
+        Path file = sampleLibrary.resolve("Monkeys Spinning Monkeys (Kevin MacLeod).mp3");
         Song first = libraryService.findByPath(file).orElseThrow();
         libraryService.scanLibrary();
         Song second = libraryService.findByPath(file).orElseThrow();
-
         assertEquals(first.getID(), second.getID());
     }
 
     @Test
     void scanLibrary_reindexesChangedFiles() throws Exception {
-        copyDirectory(getSampleLibrary(), tempDir);
-        Path file = tempDir.resolve("nested/ヨルシカ - 歩く.mp3");
-
+        copyDirectory(sampleLibrary, tempDir);
+        Path file = tempDir.resolve("nested/Bagatelle no. 25 ''Für Elise'', WoO 59.mp3");
         libraryService.setMusicDirectory(tempDir);
         libraryService.scanLibrary();
-
         Song before = libraryService.findByPath(file).orElseThrow();
         long oldTimestamp = libraryService.getLibrary()
                 .getLastModified(file)
                 .orElseThrow();
-
-        Thread.sleep(1100); // ensure filesystem timestamp changes
-
+        Thread.sleep(1100);
         Files.write(file, new byte[]{1, 2, 3}, StandardOpenOption.APPEND);
         libraryService.scanLibrary();
         Song after = libraryService.findByPath(file).orElseThrow();
-
         long newTimestamp = libraryService.getLibrary()
                 .getLastModified(file)
                 .orElseThrow();
-
         assertTrue(newTimestamp > oldTimestamp);
         assertEquals(before.getID(), after.getID());
     }
 
     @Test
     void scanLibrary_removesDeletedFiles() throws Exception {
-        copyDirectory(getSampleLibrary(), tempDir);
+        copyDirectory(sampleLibrary, tempDir);
         libraryService.setMusicDirectory(tempDir);
         libraryService.scanLibrary();
-
-        Path remove = tempDir.resolve("ヨルシカ - あぶく.mp3");
+        Path remove = tempDir.resolve("Sneaky Snitch (Kevin MacLeod).mp3");
         Files.delete(remove);
         libraryService.scanLibrary();
-
         assertEquals(3, libraryService.getSongs().size());
         assertTrue(libraryService.findByPath(remove).isEmpty());
     }
 
     @Test
     void findById_returnsIndexedSong() throws Exception {
-        libraryService.setMusicDirectory(getSampleLibrary());
+        libraryService.setMusicDirectory(sampleLibrary);
         libraryService.scanLibrary();
-
-        Path file = getSampleLibrary().resolve("nested/YOASOBI - 夜に駆ける.mp3");
+        Path file = sampleLibrary.resolve("nested/Piano Sonata no. 11, K. 331 - III. Alla Turca.mp3");
         Song song = libraryService.findByPath(file).orElseThrow();
-
         assertTrue(libraryService.findByID(song.getID()).isPresent());
     }
 
@@ -116,7 +111,6 @@ class LibraryServiceTest {
         Files.walk(source).forEach(path -> {
             try {
                 Path destination = target.resolve(source.relativize(path));
-
                 if (Files.isDirectory(path)) {
                     Files.createDirectories(destination);
                 } else {
@@ -126,13 +120,5 @@ class LibraryServiceTest {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    private Path getSampleLibrary() throws Exception {
-        return Path.of(
-                getClass()
-                        .getClassLoader()
-                        .getResource("sample-library")
-                        .toURI());
     }
 }

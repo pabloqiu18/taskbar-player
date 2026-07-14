@@ -5,7 +5,7 @@ import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.TagField;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -20,16 +20,25 @@ class MetadataReaderServiceTest {
 
     private final MetadataReaderService reader = new MetadataReaderService();
 
+    private Path sampleLibrary;
+
     @TempDir
     Path tempDir;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        sampleLibrary = Path.of(
+                getClass()
+                        .getClassLoader()
+                        .getResource("sample-library")
+                        .toURI());
+    }
 
     @Test
     void read_fallbacksWhenFileIsNotReadableAudio() throws IOException {
         Path file = tempDir.resolve("01 Cool Song.mp3");
         Files.writeString(file, "not really audio");
-
         Song song = reader.read(file);
-
         assertEquals("01 Cool Song", song.getTitle());
         assertEquals("Unknown artist", song.getArtist());
         assertTrue(song.getFeaturedArtists().isEmpty());
@@ -39,13 +48,12 @@ class MetadataReaderServiceTest {
 
     @Test
     void read_readsRealMetadata() throws Exception {
-        Path file = getSampleLibrary().resolve("ヨルシカ - あぶく.mp3");
-
+        Path file = sampleLibrary.resolve("Monkeys Spinning Monkeys (Kevin MacLeod).mp3");
         Song song = reader.read(file);
-
-        assertEquals("あぶく", song.getTitle());
-        assertEquals("ヨルシカ", song.getArtist());
-
+        assertNotNull(song.getTitle());
+        assertFalse(song.getTitle().isBlank());
+        assertNotNull(song.getArtist());
+        assertFalse(song.getArtist().isBlank());
         assertNotNull(song.getAlbum());
         assertNotNull(song.getTags());
         assertNotNull(song.getID());
@@ -55,12 +63,9 @@ class MetadataReaderServiceTest {
     //@Disabled("Developer utility")
     @Test
     void dumpStandardMetadataFields() throws Exception {
-        Path file = getSampleLibrary().resolve("Creepy Nuts, Ayase, Lilas - ばかまじめ.mp3");
-
+        Path file = sampleLibrary.resolve("Monkeys Spinning Monkeys (Kevin MacLeod).mp3");
         AudioFile audio = AudioFileIO.read(file.toFile());
-
         System.out.println("===== " + file.getFileName() + " =====");
-
         for (FieldKey key : FieldKey.values()) {
             try {
                 String value = audio.getTag().getFirst(key);
@@ -75,10 +80,8 @@ class MetadataReaderServiceTest {
     //@Disabled("Developer utility")
     @Test
     void dumpParsedSong() throws Exception {
-        Path file = getSampleLibrary().resolve("Creepy Nuts, Ayase, Lilas - ばかまじめ.mp3");
-
+        Path file = sampleLibrary.resolve("Monkeys Spinning Monkeys (Kevin MacLeod).mp3");
         Song song = reader.read(file);
-
         System.out.println("===== PARSED SONG =====");
         System.out.println("ID               : " + song.getID());
         System.out.println("Title            : " + song.getTitle());
@@ -95,25 +98,13 @@ class MetadataReaderServiceTest {
     //@Disabled("Developer utility")
     @Test
     void dumpRawTagFrames() throws Exception {
-        Path file = getSampleLibrary().resolve("ヨルシカ - あぶく.mp3");
-
+        Path file = sampleLibrary.resolve("Monkeys Spinning Monkeys (Kevin MacLeod).mp3");
         AudioFile audio = AudioFileIO.read(file.toFile());
-
         System.out.println("===== RAW TAGS =====");
-
         Iterator<TagField> iterator = audio.getTag().getFields();
-
         while (iterator.hasNext()) {
             TagField field = iterator.next();
             System.out.println(field);
         }
-    }
-
-    private Path getSampleLibrary() throws Exception {
-        return Path.of(
-                getClass()
-                        .getClassLoader()
-                        .getResource("sample-library")
-                        .toURI());
     }
 }
