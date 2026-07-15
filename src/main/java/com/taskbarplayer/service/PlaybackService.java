@@ -5,11 +5,9 @@ import javafx.application.Platform;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
-import java.nio.file.Path;
 import java.util.concurrent.CountDownLatch;
 
 public class PlaybackService {
-
     private MediaPlayer player;
     private Song currentSong;
     private PlaybackListenerService playbackListener;
@@ -25,9 +23,7 @@ public class PlaybackService {
         if (javafxInitialized) {
             return;
         }
-
         CountDownLatch latch = new CountDownLatch(1);
-
         try {
             Platform.startup(() -> {
                 javafxInitialized = true;
@@ -38,7 +34,6 @@ public class PlaybackService {
             javafxInitialized = true;
             latch.countDown();
         }
-
         try {
             latch.await();
         } catch (InterruptedException e) {
@@ -157,5 +152,12 @@ public class PlaybackService {
 
     public void setPlaybackListener(PlaybackListenerService playbackListener) {
         this.playbackListener = playbackListener;
+    }
+
+    public void shutdown() {
+        Platform.runLater(() -> {
+            disposePlayer();
+            Platform.exit();
+        });
     }
 }
