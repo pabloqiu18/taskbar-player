@@ -5,6 +5,8 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
@@ -109,8 +111,55 @@
                <center>
                   <BorderPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                      <center>
-                        <Label text="Welcome to TaskbarPlayer" BorderPane.alignment="CENTER" />
+                        <TableView minHeight="-Infinity" minWidth="-Infinity" prefHeight="360.0" prefWidth="1000.0" BorderPane.alignment="CENTER">
+                          <columns>
+                            <TableColumn maxWidth="100.0" minWidth="50.0" prefWidth="50.0" text="#" />
+                              <TableColumn maxWidth="600.0" minWidth="200.0" prefWidth="400.0" text="Title" />
+                              <TableColumn maxWidth="500.0" minWidth="200.0" prefWidth="300.0" text="Album" />
+                              <TableColumn maxWidth="200.0" minWidth="100.0" prefWidth="120.0" text="Date added" />
+                              <TableColumn maxWidth="120.0" minWidth="50.0" prefWidth="100.0" text="Duration" />
+                          </columns>
+                           <columnResizePolicy>
+                              <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                           </columnResizePolicy>
+                        </TableView>
                      </center>
+                     <top>
+                        <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="1000.0" BorderPane.alignment="CENTER">
+                           <children>
+                              <ImageView fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" HBox.hgrow="NEVER">
+                                 <image>
+                                    <Image url="@../../../test/resources/sample-images/picture.png" />
+                                 </image>
+                                 <HBox.margin>
+                                    <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
+                                 </HBox.margin>
+                              </ImageView>
+                              <VBox alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="200.0" HBox.hgrow="NEVER">
+                                 <children>
+                                    <Button mnemonicParsing="false" text="Playlist1" VBox.vgrow="NEVER">
+                                       <font>
+                                          <Font size="36.0" />
+                                       </font>
+                                    </Button>
+                                    <HBox maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" prefWidth="800.0" VBox.vgrow="NEVER">
+                                       <children>
+                                          <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="20.0" text="usename" HBox.hgrow="NEVER" />
+                                          <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="20.0" text=", " HBox.hgrow="NEVER" />
+                                          <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="20.0" text="# songs" HBox.hgrow="NEVER" />
+                                          <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="20.0" text=", " HBox.hgrow="NEVER" />
+                                          <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="20.0" text="total duration" HBox.hgrow="NEVER" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <Region maxHeight="-Infinity" minHeight="-Infinity" prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                           </children>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                        </HBox>
+                     </top>
                   </BorderPane>
                </center>
             </BorderPane>

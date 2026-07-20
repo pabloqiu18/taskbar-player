@@ -23,8 +23,8 @@ public class QueueService {
         queue.addAll(songs);
         shuffleOrder.clear();
         currentIndex = queue.isEmpty() ? -1 : 0;
-        if (shuffleEnabled) {
-            generateShuffleOrder(queue.get(currentIndex));
+        if (shuffleEnabled && !queue.isEmpty()) {
+            generateShuffleOrder(queue.getFirst());
         }
     }
 
@@ -34,9 +34,6 @@ public class QueueService {
 
     private void generateShuffleOrder(Song current) {
         shuffleOrder.clear();
-        if (queue.isEmpty()) {
-            return;
-        }
         shuffleOrder.addAll(queue);
         shuffleOrder.remove(current);
         Collections.shuffle(shuffleOrder);
@@ -46,8 +43,11 @@ public class QueueService {
 
     public Song getCurrentSong() {
         List<Song> active = activeQueue();
-        if (currentIndex < 0 || currentIndex >= active.size()) {
+        if (active.isEmpty()) {
             return null;
+        }
+        if (currentIndex < 0 || currentIndex >= active.size()) {
+            throw new IndexOutOfBoundsException("Index out of bounds: " + currentIndex);
         }
         return active.get(currentIndex);
     }
@@ -57,23 +57,16 @@ public class QueueService {
         if (repeatMode == RepeatMode.ONE) {
             return active.get(currentIndex);
         } else if (repeatMode == RepeatMode.ALL) {
-            if (active.isEmpty()) {
-                return null;
-            }
-            currentIndex++;
-            if (currentIndex >= active.size()) {
-                currentIndex = 0;
-            }
+            currentIndex = (currentIndex + 1) % active.size();
             return active.get(currentIndex);
-        } else if (repeatMode == RepeatMode.OFF) {
+        } else {
             currentIndex++;
-            if (active.isEmpty() || currentIndex >= active.size()) {
-                currentIndex = active.size() - 1;
-                return null;
+            // Make sure that if next() is called and it should've ended the queue, stop playback
+            if (currentIndex >= active.size()) {
+                currentIndex--;
             }
             return active.get(currentIndex);
         }
-        return null;
     }
 
     public Song previous() {
@@ -81,18 +74,9 @@ public class QueueService {
         if (repeatMode == RepeatMode.ONE) {
             return active.get(currentIndex);
         } else if (repeatMode == RepeatMode.ALL) {
-            if (active.isEmpty()) {
-                return null;
-            }
-            currentIndex--;
-            if (currentIndex < 0) {
-                currentIndex = active.size() - 1;
-            }
+            currentIndex = (currentIndex - 1 + active.size()) % active.size();
             return active.get(currentIndex);
-        } else if (repeatMode == RepeatMode.OFF) {
-            if (active.isEmpty()) {
-                return null;
-            }
+        } else {
             if (currentIndex == 0) {
                 if (shuffleEnabled) {
                     Song last =  shuffleOrder.removeLast();
@@ -105,7 +89,6 @@ public class QueueService {
                 return active.get(currentIndex);
             }
         }
-        return null;
     }
 
     public Song setCurrentSong(int index) {
@@ -141,6 +124,9 @@ public class QueueService {
     public void toggleShuffle() {
         Song current = getCurrentSong();
         shuffleEnabled = !shuffleEnabled;
+        if (current == null) {
+            return;
+        }
         if (shuffleEnabled) {
             generateShuffleOrder(current);
         } else {
